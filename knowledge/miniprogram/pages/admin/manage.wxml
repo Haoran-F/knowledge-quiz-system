@@ -1,0 +1,185 @@
+<!-- 管理页面 -->
+<view class="container">
+  <!-- 顶部标题栏 -->
+  <view class="header">
+    <text class="title">管理中心</text>
+  </view>
+
+  <!-- 标签页切换 -->
+  <view class="tabs">
+    <view 
+      class="tab-item {{currentTab === 'question' ? 'active' : ''}}" 
+      bindtap="switchTab" 
+      data-tab="question"
+    >
+      题库管理
+    </view>
+    <view 
+      class="tab-item {{currentTab === 'user' ? 'active' : ''}}" 
+      bindtap="switchTab" 
+      data-tab="user"
+    >
+      用户管理
+    </view>
+  </view>
+
+  <!-- ========== 题库管理标签页 ========== -->
+  <view wx:if="{{currentTab === 'question'}}">
+    <button class="btn-add" bindtap="showAddModal">
+      <image src="/images/icon-add.png" mode="aspectFit"></image>
+      新增题目
+    </button>
+
+    <!-- 科目筛选 -->
+    <view class="filter-bar">
+      <scroll-view scroll-x class="filter-scroll">
+        <view class="filter-list">
+          <view 
+            wx:for="{{subjectList}}" 
+            wx:key="index"
+            class="filter-item {{currentSubject === item ? 'active' : ''}}"
+            bindtap="filterBySubject"
+            data-subject="{{item}}"
+          >
+            {{item}}
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+
+    <!-- 题目列表 -->
+    <view class="question-list">
+      <view wx:for="{{questionList}}" wx:key="q_id" class="question-card">
+        <view class="card-header">
+          <view class="subject-tag">{{item.subject_name}}</view>
+          <view class="answer-tag">答案：{{item.answer}}</view>
+        </view>
+        <view class="card-title">{{item.title}}</view>
+        <view class="card-options">
+          <text>A. {{item.option_A}}</text>
+          <text>B. {{item.option_B}}</text>
+          <text>C. {{item.option_C}}</text>
+          <text>D. {{item.option_D}}</text>
+        </view>
+        <view class="card-analysis" wx:if="{{item.analysis}}">
+          <text class="label">解析：</text>
+          <text>{{item.analysis}}</text>
+        </view>
+        <view class="card-actions">
+          <button class="btn-edit" bindtap="editQuestion" data-question="{{item}}">编辑</button>
+          <button class="btn-delete" bindtap="deleteQuestion" data-qid="{{item.q_id}}">删除</button>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ========== 用户管理标签页 ========== -->
+  <view wx:if="{{currentTab === 'user'}}">
+    <!-- 用户列表 -->
+    <view class="user-list">
+      <view wx:for="{{userList}}" wx:key="user_id" class="user-card">
+        <image class="user-avatar" src="{{item.wx_avatar || '/images/icon-user.png'}}" mode="aspectFill"></image>
+        <view class="user-info">
+          <text class="user-name">{{item.wx_name || '未知用户'}}</text>
+          <text class="user-detail">用户ID: {{item.user_id}}</text>
+          <text class="user-detail" wx:if="{{item.phone}}">手机号: {{item.phone}}</text>
+          <text class="user-detail">注册时间: {{item.create_time || '-'}}</text>
+        </view>
+        <view class="user-actions">
+          <button class="btn-edit" bindtap="editUser" data-user="{{item}}">编辑</button>
+          <button class="btn-delete" bindtap="deleteUser" data-userid="{{item.user_id}}">删除</button>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{userList.length === 0}}">
+      <text class="empty-icon">👤</text>
+      <text class="empty-text">暂无用户数据</text>
+    </view>
+  </view>
+
+  <!-- 新增/编辑题目弹窗 -->
+  <view class="modal" wx:if="{{showModal}}">
+    <view class="modal-content">
+      <text class="modal-title">{{editingQuestion ? '编辑题目' : '新增题目'}}</text>
+      
+      <view class="form-group">
+        <text class="label">科目名称</text>
+        <input class="input" placeholder="请输入科目名称" value="{{formData.subject_name}}" bindinput="onFormInput" data-field="subject_name" />
+      </view>
+      
+      <view class="form-group">
+        <text class="label">题干内容</text>
+        <textarea class="textarea" placeholder="请输入题干内容" value="{{formData.title}}" bindinput="onFormInput" data-field="title"></textarea>
+      </view>
+      
+      <view class="form-group">
+        <text class="label">选项A</text>
+        <input class="input" placeholder="请输入选项A" value="{{formData.option_A}}" bindinput="onFormInput" data-field="option_A" />
+      </view>
+      
+      <view class="form-group">
+        <text class="label">选项B</text>
+        <input class="input" placeholder="请输入选项B" value="{{formData.option_B}}" bindinput="onFormInput" data-field="option_B" />
+      </view>
+      
+      <view class="form-group">
+        <text class="label">选项C</text>
+        <input class="input" placeholder="请输入选项C" value="{{formData.option_C}}" bindinput="onFormInput" data-field="option_C" />
+      </view>
+      
+      <view class="form-group">
+        <text class="label">选项D</text>
+        <input class="input" placeholder="请输入选项D" value="{{formData.option_D}}" bindinput="onFormInput" data-field="option_D" />
+      </view>
+      
+      <view class="form-group">
+        <text class="label">正确答案</text>
+        <input class="input" placeholder="请输入正确答案(A/B/C/D)" value="{{formData.answer}}" bindinput="onFormInput" data-field="answer" />
+      </view>
+      
+      <view class="form-group">
+        <text class="label">答案解析</text>
+        <textarea class="textarea" placeholder="请输入答案解析" value="{{formData.analysis}}" bindinput="onFormInput" data-field="analysis"></textarea>
+      </view>
+      
+      <view class="modal-actions">
+        <button class="btn-cancel" bindtap="closeModal">取消</button>
+        <button class="btn-submit" bindtap="submitQuestion">提交</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 编辑用户弹窗 -->
+  <view class="modal" wx:if="{{showUserModal}}">
+    <view class="modal-content">
+      <text class="modal-title">编辑用户信息</text>
+      
+      <view class="form-group">
+        <text class="label">用户ID</text>
+        <input class="input" disabled value="{{userFormData.user_id}}" />
+      </view>
+      
+      <view class="form-group">
+        <text class="label">用户昵称</text>
+        <input class="input" placeholder="请输入用户昵称" value="{{userFormData.wx_name}}" bindinput="onUserFormInput" data-field="wx_name" />
+      </view>
+      
+      <view class="form-group">
+        <text class="label">头像地址</text>
+        <input class="input" placeholder="请输入头像地址" value="{{userFormData.wx_avatar}}" bindinput="onUserFormInput" data-field="wx_avatar" />
+      </view>
+      
+      <view class="form-group">
+        <text class="label">联系电话</text>
+        <input class="input" placeholder="请输入联系电话" value="{{userFormData.phone}}" bindinput="onUserFormInput" data-field="phone" />
+      </view>
+      
+      <view class="modal-actions">
+        <button class="btn-cancel" bindtap="closeUserModal">取消</button>
+        <button class="btn-submit" bindtap="submitUser">保存</button>
+      </view>
+    </view>
+  </view>
+</view>

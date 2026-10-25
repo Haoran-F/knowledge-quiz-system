@@ -1,0 +1,66 @@
+<!-- 首页 - 科目分类卡片 -->
+<view class="container">
+  <!-- 头部欢迎区域 -->
+  <view class="header">
+    <image class="header-bg" src="/images/bg-gradient.png" mode="aspectFill"></image>
+    <view class="header-content">
+      <view class="greeting-row">
+        <view class="greeting-text">
+          <text class="hello-text">{{greetingText}}，</text>
+          <text class="user-text">{{userName}}</text>
+        </view>
+        <image class="header-avatar" src="{{userAvatar || '/images/icon-user.jpg'}}" mode="aspectFill"></image>
+      </view>
+      <view class="welcome">
+        <image class="logo" src="/images/icon-book.png" mode="aspectFit"></image>
+        <text class="title">知识题库系统</text>
+        <text class="subtitle">选择科目，开启今日学习之旅 ✨</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 科目分类卡片列表 -->
+  <view class="subject-list">
+    <view class="section-title">
+      <view class="title-left">
+        <view class="title-dot"></view>
+        <text class="title-text">选择科目</text>
+      </view>
+    </view>
+    <view 
+      wx:for="{{subjectList}}" 
+      wx:key="index" 
+      class="subject-card subject-card-{{index}}"
+      bindtap="goToExam"
+      data-subject="{{item}}"
+      hover-class="card-hover"
+      hover-stay-time="100"
+    >
+      <image class="card-icon" src="{{getSubjectIcon(item)}}"></image>
+      <view class="card-content">
+        <text class="card-title">{{item}}</text>
+        <text class="card-desc">{{getSubjectDesc(item)}}</text>
+      </view>
+      <view class="card-arrow">
+        <text class="arrow-icon">›</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 每日学习小贴士 -->
+  <view class="tip-card">
+    <view class="tip-icon-wrap">
+      <text class="tip-emoji">💡</text>
+    </view>
+    <view class="tip-content">
+      <text class="tip-title">今日学习小贴士</text>
+      <text class="tip-text">{{dailyTip}}</text>
+    </view>
+  </view>
+
+  <!-- 底部提示 -->
+  <view class="footer">
+    <text class="footer-text">— 坚持学习，未来可期 —</text>
+    <text class="footer-sub">每天进步一点点 📚</text>
+  </view>
+</view>

@@ -1,0 +1,179 @@
+<!-- 刷题页面 -->
+<view class="container">
+  <!-- 顶部导航已移除 -->
+
+  <!-- 题目内容区域 -->
+  <view class="question-area" wx:if="{{currentQuestion}}">
+    <!-- 题目卡片 -->
+    <view class="question-card">
+      <view class="card-decor"></view>
+      <!-- 科目标签 -->
+      <view class="tag-row">
+        <view class="subject-tag" style="background: {{getSubjectGradient(subject)}};">
+          <text class="tag-emoji">{{getSubjectEmoji(subject)}}</text>
+          <text>{{currentQuestion.subject_name}}</text>
+        </view>
+        <view class="question-id-tag">
+          <text>NO.{{currentQuestion.q_id}}</text>
+        </view>
+      </view>
+      
+      <!-- 题干 -->
+      <view class="question-title-wrap">
+        <view class="question-number">{{currentIndex + 1}}</view>
+        <text class="question-title">{{currentQuestion.title}}</text>
+      </view>
+    </view>
+
+    <!-- 选项列表 -->
+    <view class="option-list">
+      <view 
+        wx:for="{{options}}" 
+        wx:key="key"
+        class="option-item {{getOptionClass(item.key)}}"
+        bindtap="selectOption"
+        data-option="{{item.key}}"
+        hover-class="option-hover"
+        hover-stay-time="80"
+      >
+        <view class="option-key-wrap">
+          <view class="option-key">{{item.key}}</view>
+        </view>
+        <view class="option-text">{{item.value}}</view>
+        <view class="option-status" wx:if="{{showAnswer && key === currentQuestion.answer}}">
+          <view class="status-circle correct">
+            <text class="status-icon">✓</text>
+          </view>
+        </view>
+        <view class="option-status" wx:if="{{showAnswer && key === selectedOption && !isCorrect}}">
+          <view class="status-circle wrong">
+            <text class="status-icon">✗</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 答案解析区域 -->
+    <view class="analysis-area" wx:if="{{showAnswer}}">
+      <view class="analysis-header {{isCorrect ? 'correct' : 'wrong'}}">
+        <view class="analysis-icon-wrap">
+          <text class="analysis-icon">{{isCorrect ? '🎉' : '💪'}}</text>
+        </view>
+        <view class="analysis-text-wrap">
+          <text class="analysis-title">{{isCorrect ? '太棒了，回答正确！' : '没关系，再试试！'}}</text>
+          <text class="analysis-desc">{{isCorrect ? '继续保持，下一题加油~' : '看看解析，掌握知识点'}}</text>
+        </view>
+      </view>
+      <view class="analysis-body">
+        <view class="answer-row">
+          <text class="answer-label">正确答案</text>
+          <view class="answer-badge">{{currentQuestion.answer}}</view>
+        </view>
+        <view class="divider"></view>
+        <view class="analysis-content" wx:if="{{currentQuestion.analysis}}">
+          <text class="content-label">📖 答案解析</text>
+          <text class="content-text">{{currentQuestion.analysis}}</text>
+        </view>
+      </view>
+      <!-- 操作按钮 -->
+      <view class="analysis-actions">
+        <button class="action-btn secondary" bindtap="addToWrong" wx:if="{{!isCorrect}}">
+          <text class="btn-emoji">📝</text>
+          <text>加入错题本</text>
+        </button>
+        <button class="action-btn primary" bindtap="nextQuestion">
+          <text>{{currentIndex === questionList.length - 1 ? '查看结果' : '下一题'}}</text>
+          <text class="next-arrow">→</text>
+        </button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部操作按钮（未答题时显示） -->
+  <view class="bottom-bar" wx:if="{{!showAnswer}}">
+    <button 
+      class="nav-btn prev {{currentIndex === 0 ? 'disabled' : ''}}" 
+      bindtap="prevQuestion" 
+    >
+      <text class="nav-arrow">←</text>
+      <text>上一题</text>
+    </button>
+    <button 
+      class="nav-btn next"
+      bindtap="skipQuestion"
+    >
+      <text>跳过此题</text>
+      <text class="nav-arrow">→</text>
+    </button>
+  </view>
+
+  <!-- 完成弹窗 -->
+  <view class="modal-mask" wx:if="{{showFinish}}" catchtouchmove="noop">
+    <view class="modal-content">
+      <view class="modal-decor-top"></view>
+      <!-- 顶部庆祝区 -->
+      <view class="celebrate-area">
+        <view class="celebrate-emoji">{{getCelebrateEmoji()}}</view>
+        <text class="modal-title">答题完成!</text>
+        <text class="modal-subtitle">{{finishEncourage()}}</text>
+      </view>
+      <!-- 分数圆环 -->
+      <view class="score-ring-wrap">
+        <view class="score-ring" style="background: conic-gradient({{getScoreColor()}} {{correctRate}}%, #f0f0f0 0);">
+          <view class="score-inner">
+            <text class="score-big">{{correctRate}}</text>
+            <text class="score-percent">%</text>
+            <text class="score-label">正确率</text>
+          </view>
+        </view>
+      </view>
+      <!-- 统计数据 -->
+      <view class="modal-stats">
+        <view class="stat-block">
+          <view class="stat-icon total">📋</view>
+          <view class="stat-info">
+            <text class="stat-value">{{questionList.length}}</text>
+            <text class="stat-name">总题数</text>
+          </view>
+        </view>
+        <view class="stat-block">
+          <view class="stat-icon ok">✅</view>
+          <view class="stat-info">
+            <text class="stat-value correct">{{correctNum}}</text>
+            <text class="stat-name">答对</text>
+          </view>
+        </view>
+        <view class="stat-block">
+          <view class="stat-icon no">❌</view>
+          <view class="stat-info">
+            <text class="stat-value wrong">{{questionList.length - correctNum}}</text>
+            <text class="stat-name">答错</text>
+          </view>
+        </view>
+      </view>
+      <!-- 操作按钮 -->
+      <view class="modal-actions">
+        <button class="modal-btn secondary" bindtap="retryExam">
+          <text class="btn-emoji">🔄</text>
+          <text>再练一次</text>
+        </button>
+        <button class="modal-btn primary" bindtap="goBack">
+          <text>返回首页</text>
+        </button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 返回确认弹窗 -->
+  <view class="confirm-mask" wx:if="{{showConfirm}}" catchtouchmove="noop">
+    <view class="confirm-box">
+      <view class="confirm-icon">🤔</view>
+      <text class="confirm-title">确定要退出吗？</text>
+      <text class="confirm-desc">答题进度将不会保存哦~</text>
+      <view class="confirm-actions">
+        <button class="confirm-btn cancel" bindtap="cancelBack">继续答题</button>
+        <button class="confirm-btn ok" bindtap="doBack">确认退出</button>
+      </view>
+    </view>
+  </view>
+</view>

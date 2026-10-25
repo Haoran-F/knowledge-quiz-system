@@ -1,0 +1,132 @@
+<!-- 错题本页面 -->
+<view class="container">
+  <!-- 头部渐变区域 -->
+  <view class="header">
+    <view class="header-decoration deco1"></view>
+    <view class="header-decoration deco2"></view>
+    <view class="header-content">
+      <view class="header-top">
+        <view class="header-icon-wrap">
+          <text class="header-icon">📚</text>
+        </view>
+        <view class="header-title-wrap">
+          <text class="header-title">错题本</text>
+          <text class="header-subtitle">查漏补缺，巩固提升</text>
+        </view>
+      </view>
+      <view class="stats-main">
+        <view class="total-count">
+          <text class="count-num">{{totalWrong}}</text>
+          <text class="count-label">总错题数</text>
+        </view>
+      </view>
+      <view class="subject-stats">
+        <view class="subject-stat-item" wx:for="{{subjectStats}}" wx:key="name">
+          <text class="ss-emoji">{{item.emoji}}</text>
+          <text class="ss-name">{{item.name}}</text>
+          <view class="ss-bar">
+            <view class="ss-bar-inner" style="width:{{item.percent}}%;background:{{item.gradient}};"></view>
+          </view>
+          <text class="ss-count">{{item.count}}</text>
+        </view>
+      </view>
+    </view>
+    <view class="header-bottom-curve"></view>
+  </view>
+
+  <!-- 科目筛选栏 -->
+  <scroll-view class="filter-scroll" scroll-x="{{true}}" enhanced="{{true}}" show-scrollbar="{{false}}">
+    <view class="filter-tabs">
+      <view class="filter-tab {{activeSubject === item ? 'active' : ''}}" 
+            wx:for="{{subjectList}}" 
+            wx:key="*this"
+            bindtap="switchSubject"
+            data-subject="{{item}}">
+        <text class="ft-text">{{item}}</text>
+        <view class="ft-badge" wx:if="{{getSubjectCount(item) > 0 && item !== '全部'}}">{{getSubjectCount(item)}}</view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 错题列表 -->
+  <view class="wrong-list">
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{filteredList.length === 0}}">
+      <view class="empty-emoji-wrap">
+        <text class="empty-emoji">🎉</text>
+      </view>
+      <text class="empty-title">太棒啦！</text>
+      <text class="empty-subtitle">{{activeSubject === '全部' ? '暂时没有错题' : activeSubject + '暂无错题'}}</text>
+      <text class="empty-tip">坚持就是胜利，继续加油刷题吧！</text>
+      <button class="btn-go-exam" bindtap="goToHome">🚀 去刷题</button>
+    </view>
+
+    <!-- 错题卡片列表 -->
+    <view wx:for="{{filteredList}}" wx:key="w_id" class="wrong-card">
+      <view class="card-decoration deco-card1"></view>
+      <view class="card-decoration deco-card2"></view>
+      <view class="card-header">
+        <view class="subject-tag" style="background:{{getSubjectGradient(item.subject_name)}};">
+          <text class="st-emoji">{{getSubjectEmoji(item.subject_name)}}</text>
+          <text>{{item.subject_name}}</text>
+        </view>
+        <text class="add-time">📅 {{item.add_time}}</text>
+      </view>
+      <view class="card-title">{{index + 1}}. {{item.title}}</view>
+      
+      <view class="toggle-btn" bindtap="toggleCard" data-wid="{{item.w_id}}">
+        <text class="tb-text">{{expandedMap[item.w_id] ? '收起详情' : '展开详情'}}</text>
+        <text class="tb-arrow {{expandedMap[item.w_id] ? 'up' : ''}}">▾</text>
+      </view>
+
+      <view class="card-detail" wx:if="{{expandedMap[item.w_id]}}">
+        <view class="card-options">
+          <view class="option-row {{item.answer === 'A' ? 'is-answer' : ''}}">
+            <text class="option-label">A.</text>
+            <text>{{item.option_A}}</text>
+          </view>
+          <view class="option-row {{item.answer === 'B' ? 'is-answer' : ''}}">
+            <text class="option-label">B.</text>
+            <text>{{item.option_B}}</text>
+          </view>
+          <view class="option-row {{item.answer === 'C' ? 'is-answer' : ''}}">
+            <text class="option-label">C.</text>
+            <text>{{item.option_C}}</text>
+          </view>
+          <view class="option-row {{item.answer === 'D' ? 'is-answer' : ''}}">
+            <text class="option-label">D.</text>
+            <text>{{item.option_D}}</text>
+          </view>
+        </view>
+        <view class="card-answer">
+          <text class="label">✅ 正确答案：</text>
+          <text class="answer">{{item.answer}}</text>
+        </view>
+        <view class="card-analysis" wx:if="{{item.analysis}}">
+          <text class="label">💡 解析：</text>
+          <text class="analysis-text">{{item.analysis}}</text>
+        </view>
+      </view>
+
+      <view class="card-actions">
+        <button class="btn btn-redo" bindtap="redoQuestion" data-qid="{{item.q_id}}" data-subject="{{item.subject_name}}">
+          <text class="btn-icon">✏️</text>
+          <text>重做此题</text>
+        </button>
+        <button class="btn btn-delete" bindtap="confirmDelete" data-wid="{{item.w_id}}">
+          <text class="btn-icon">🗑️</text>
+          <text>删除</text>
+        </button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部操作栏 -->
+  <view class="bottom-bar" wx:if="{{wrongList.length > 0}}">
+    <button class="btn-clear-all" bindtap="confirmClearAll">
+      <text class="ca-icon">🧹</text>
+      <text>清空全部错题</text>
+    </button>
+  </view>
+  <view class="bottom-placeholder" wx:if="{{wrongList.length > 0}}"></view>
+</view>

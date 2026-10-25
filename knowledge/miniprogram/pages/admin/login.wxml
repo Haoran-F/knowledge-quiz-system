@@ -1,0 +1,37 @@
+<!-- 管理员登录页面 -->
+<view class="container">
+  <view class="bg-gradient">
+    <image class="bg-image" src="/images/bg-gradient.png" mode="aspectFill"></image>
+  </view>
+  
+  <view class="login-box">
+    <image class="logo" src="/images/icon-settings.png" mode="aspectFit"></image>
+    <text class="title">管理员登录</text>
+    <text class="subtitle">题库管理系统</text>
+    
+    <view class="form-group">
+      <text class="label">账号</text>
+      <input 
+        class="input" 
+        placeholder="请输入管理员账号" 
+        bindinput="onUsernameInput"
+        value="{{username}}"
+      />
+    </view>
+    
+    <view class="form-group">
+      <text class="label">密码</text>
+      <input 
+        class="input" 
+        type="password"
+        placeholder="请输入管理员密码" 
+        bindinput="onPasswordInput"
+        value="{{password}}"
+      />
+    </view>
+    
+    <button class="btn-login" bindtap="doLogin">登录</button>
+    
+    <text class="tips">账号：admin | 密码：12345678</text>
+  </view>
+</view>
